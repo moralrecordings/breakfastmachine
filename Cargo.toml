@@ -7,11 +7,25 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# SDL2 bindings, used to provide access to multimedia hardware
 sdl2                = { version = "0.34.*", features = ["bundled", "static-link"] }
 sdl2-sys            = "0.34.*"
 gl                  = "0.14.*"
+
+# Dear imgui bindings, used to provide the GUI
 imgui               = { git = "https://github.com/imgui-rs/imgui-rs" }
 imgui-sdl2-support  = { git = "https://github.com/imgui-rs/imgui-rs" }
 imgui-glow-renderer = { git = "https://github.com/imgui-rs/imgui-rs" }
 glow                = "0.10.*"
+
+# Used for packing images into a texture atlas
+rectangle-pack      = "0.4.2"
+
+sharded-slab        = "0.1.4"
+
+# Used for providing easy byte array handling
+bytes               = "1.1.0"
+
+# Used for reading primitives from binary files
+byteorder           = "1.4.3"
 
