@@ -1,17 +1,52 @@
 use glow::HasContext;
-use imgui::Context;
 use imgui::Condition;
+use imgui::Context;
 use imgui::Ui;
 use imgui_glow_renderer::AutoRenderer;
 use imgui_sdl2_support::SdlPlatform;
 use sdl2::{
     event::Event,
+    rect::Rect,
     video::{GLProfile, Window},
 };
+use sharded_slab::{Clear, Pool};
+
+// - create a pool of Parts using the slab allocator
+// - avoid components for now, instead just overload Parts?
+
+struct Part {
+    preset_id: u32,
+    bbox: Rect,
+    align: u32,
+}
+
+impl Default for Part {
+    fn default() -> Self {
+        Part {
+            preset_id: 0,
+            bbox: Rect::new(0, 0, 32, 32),
+            align: 1,
+        }
+    }
+}
+
+impl Clear for Part {
+    fn clear(&mut self) {}
+}
+
+struct MachineState {
+    parts: Pool<Part>,
+}
+
+impl Default for MachineState {
+    fn default() -> Self {
+        MachineState { parts: Pool::new() }
+    }
+}
 
 struct UiState {
     show_app_open: bool,
-    show_app_preferences: bool
+    show_app_preferences: bool,
 }
 
 impl Default for UiState {
@@ -33,11 +68,15 @@ fn glow_context(window: &Window) -> glow::Context {
 fn draw_menu_bar(ui: &Ui, state: &mut UiState) {
     if let Some(menu_bar) = ui.begin_main_menu_bar() {
         if let Some(menu) = ui.begin_menu("File") {
-            ui.menu_item_config("Open").shortcut("CTRL+O").build_with_ref(&mut state.show_app_open);
+            ui.menu_item_config("Open")
+                .shortcut("CTRL+O")
+                .build_with_ref(&mut state.show_app_open);
             menu.end();
         };
         if let Some(menu) = ui.begin_menu("Edit") {
-            ui.menu_item_config("Preferences").shortcut("CTRL+P").build_with_ref(&mut state.show_app_preferences);
+            ui.menu_item_config("Preferences")
+                .shortcut("CTRL+P")
+                .build_with_ref(&mut state.show_app_preferences);
             menu.end();
         };
         menu_bar.end();
@@ -90,6 +129,8 @@ fn main() {
 
     let mut state = UiState::default();
 
+    let mut machine = MachineState::default();
+
     'main: loop {
         for event in event_pump.poll_iter() {
             /* pass all events to imgui platfrom */
@@ -118,7 +159,7 @@ fn main() {
             .position([0.0, 0.0], Condition::Always)
             .size([window_size.0 as f32, window_size.1 as f32], Condition::Always)
             .build(|| {
-                
+
                 ui.text_wrapped("Choo choo");
             });
         */
